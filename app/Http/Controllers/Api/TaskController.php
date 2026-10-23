@@ -15,18 +15,24 @@ class TaskController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = $request->validate([
-            'status' => [
-                'sometimes',
-                'required',
-                Rule::in(['todo', 'in_progress', 'done']),
-            ],
-            'priority' => [
-                'sometimes',
-                'required',
-                Rule::in(['low', 'medium', 'high']),
-            ],
-        ]);
+            $filters = $request->validate([
+                'status' => [
+                    'sometimes',
+                    'required',
+                    Rule::in(['todo', 'in_progress', 'done']),
+                ],
+                'priority' => [
+                    'sometimes',
+                    'required',
+                    Rule::in(['low', 'medium', 'high']),
+                ],
+                'search' => [
+                    'sometimes',
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+            ]);
 
         $tasks = Task::query()
             ->when(
@@ -42,6 +48,18 @@ class TaskController extends Controller
                     'priority',
                     $filters['priority']
                 )
+            )
+            ->when(
+                filled($filters['search'] ?? null),
+                function ($query) use ($filters) {
+                    $search = $filters['search'];
+
+                    $query->where(function ($subQuery) use ($search) {
+                        $subQuery
+                            ->where('title', 'like', "%{$search}%")
+                            ->orWhere('description', 'like', "%{$search}%");
+                    });
+                }
             )
             ->orderByDesc('created_at')
             ->orderByDesc('id')

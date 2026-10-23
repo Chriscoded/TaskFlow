@@ -42,7 +42,7 @@ class StoreTaskRequest extends FormRequest
                 'sometimes',
                 'nullable',
                 'date_format:Y-m-d',
-            ],
+            ]
         ];
     }
 }
