@@ -127,6 +127,32 @@ function TaskFlowApp() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
 
+  const DESKTOP_BREAKPOINT = 1024;
+
+  const [isDesktop, setIsDesktop] = useState(
+  () => window.innerWidth >= DESKTOP_BREAKPOINT,
+);
+
+const [isCollapsed, setIsCollapsed] = useState(false);
+
+useEffect(() => {
+  const mediaQuery = window.matchMedia(
+    `(min-width: ${DESKTOP_BREAKPOINT}px)`,
+  );
+
+  const handleScreenChange = (event: MediaQueryListEvent) => {
+    setIsDesktop(event.matches);
+    setIsCollapsed(false);
+  };
+
+  setIsDesktop(mediaQuery.matches);
+  mediaQuery.addEventListener("change", handleScreenChange);
+
+  return () => {
+    mediaQuery.removeEventListener("change", handleScreenChange);
+  };
+}, []);
+
   const loadTasks = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -322,12 +348,46 @@ function TaskFlowApp() {
   }
 
   return (
-    <main className="app-shell">
-      <aside className="sidebar">
-        <a className="brand" href="#dashboard" aria-label="TaskFlow home">
-          <span className="brand-mark">T</span>
-          <span>TaskFlow</span>
-        </a>
+    <main className={`app-shell ${isCollapsed ? "main-panel-toggle" : ""}`}>
+                <button
+            type="button"
+            className={`sidebar-toggle ${isCollapsed ? "sidebar-toggle-collapsed" : ""}`}
+            title={isCollapsed && isDesktop ? "Tasks" : undefined}
+            onClick={() => setIsCollapsed((prev) => !prev)}
+            aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
+            aria-expanded={!isCollapsed}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M4 6h16" />
+              <path d="M4 12h16" />
+              <path d="M4 18h16" />
+            </svg>
+          </button>
+          
+      <aside className={`sidebar ${isCollapsed ? "sidebar-collapsed" : ""}`}>
+        <div className={`sidebar-header ${isCollapsed ? "is-collapsed" : ""}`}>
+          {!isCollapsed && (
+            <div className="sidebar-brand">
+             <a className="brand" href="#dashboard" aria-label="TaskFlow home">
+                <span className="brand-mark">T</span>
+                <span>TaskFlow</span>
+              </a>
+                    
+            </div>
+          )}
+
+        </div>
 
         <p className="sidebar-label">WORKSPACE</p>
 

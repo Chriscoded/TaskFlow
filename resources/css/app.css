@@ -50,21 +50,64 @@ a {
 }
 
 .app-shell {
+  display: flex;
   min-height: 100vh;
 }
 
+.main-panel {
+  flex: 1;
+  min-width: 0;
+}
+
 .sidebar {
-  position: fixed;
+   position: fixed;
   inset: 0 auto 0 0;
   z-index: 5;
   display: flex;
-  width: 244px;
+  width: 200px;
   flex-direction: column;
   padding: 28px 18px 20px;
   border-right: 1px solid #e9eaf2;
-  background: #fff;
+  background: #fff; 
 }
 
+/* Desktop: retain a narrow rail containing icons */
+.sidebar.sidebar-icons-only {
+  flex-basis: 72px;
+  width: 72px;
+}
+
+.sidebar.sidebar-icons-only .sidebar-nav-item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+.sidebar.sidebar-icons-only .sidebar-nav-icon {
+  flex-shrink: 0;
+}
+
+/* Main content fills the available width */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-panel {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+/* Small screens: hide the sidebar completely */
+@media (max-width: 1023px) {
+  .sidebar.sidebar-hidden {
+    display: none;
+  }
+
+  .sidebar {
+    flex-basis: 240px;
+    width: 240px;
+  }
+}
 .brand {
   display: flex;
   align-items: center;
@@ -1030,4 +1073,67 @@ button:disabled {
   .task-modal {
     animation: none;
   }
+}
+
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  flex-shrink: 0;
+  transition:
+    width 0.25s ease,
+    min-width 0.25s ease,
+    opacity 0.2s ease;
+}
+
+.sidebar.sidebar-collapsed {
+  width: 150px;
+  min-width: 150px;
+  opacity: 0;
+  overflow: hidden;
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  pointer-events: none;
+}
+
+.main-panel-toggle {
+  margin-left: -200px!important;
+  justify-content: center;
+}
+
+.sidebar-toggle {
+  position: fixed;
+  top: 18px;
+  left: 252px;
+  z-index: 1001;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 8%);
+  transition: left 0.25s ease, background 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: #f1f5f9;
+}
+
+.sidebar-toggle-collapsed {
+  left: 16px;
+}
+
+.sidebar-toggle:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+.main-panel {
+  flex: 1;
+  min-width: 0;
 }
