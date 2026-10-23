@@ -800,3 +800,234 @@ button:disabled {
   opacity: 0.55;
 }
 
+
+/* TaskFlow - New Task Modal */
+.task-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: task-modal-fade-in 180ms ease-out;
+}
+
+.task-modal {
+  width: 100%;
+  max-width: 620px;
+  max-height: min(88vh, 820px);
+  overflow-y: auto;
+  background: #ffffff;
+  color: #172033;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 22px;
+  box-shadow: 0 28px 90px rgba(15, 23, 42, 0.24);
+  animation: task-modal-slide-in 220ms ease-out;
+}
+
+.task-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 28px 30px 24px;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.task-modal-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.task-modal-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #6257e8, #8175f5);
+  border-radius: 15px;
+  box-shadow: 0 6px 16px rgba(98, 87, 232, 0.22);
+}
+
+.task-modal-header h2 {
+  margin: 2px 0 7px;
+  color: #172033;
+  font-size: 23px;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+  line-height: 1.25;
+}
+
+.task-modal-header p {
+  max-width: 390px;
+  margin: 0;
+  color: #7a8497;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.task-modal-close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  color: #687386;
+  background: #f5f6fa;
+  border: 1px solid #eceef3;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.task-modal-close:hover:not(:disabled) {
+  color: #312e81;
+  background: #eeecff;
+}
+
+.task-modal-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.task-modal-body {
+  padding: 26px 30px 30px;
+}
+
+.task-modal-body form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.task-modal-body label {
+  display: block;
+  margin-bottom: 8px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.task-modal-body input,
+.task-modal-body textarea,
+.task-modal-body select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  color: #172033;
+  background: #fbfcfe;
+  border: 1px solid #dfe4ed;
+  border-radius: 11px;
+  outline: none;
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 160ms ease, box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.task-modal-body textarea {
+  min-height: 105px;
+  resize: vertical;
+}
+
+.task-modal-body input:focus,
+.task-modal-body textarea:focus,
+.task-modal-body select:focus {
+  background: #ffffff;
+  border-color: #7165ec;
+  box-shadow: 0 0 0 4px rgba(113, 101, 236, 0.12);
+}
+
+.task-modal-body input::placeholder,
+.task-modal-body textarea::placeholder {
+  color: #a0a8b7;
+}
+
+.task-modal-body input:disabled,
+.task-modal-body textarea:disabled,
+.task-modal-body select:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.task-modal-body button[type="submit"] {
+  min-height: 47px;
+  padding: 12px 20px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #6257e8, #7569f0);
+  border: none;
+  border-radius: 11px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 14px rgba(98, 87, 232, 0.2);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.task-modal-body button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(98, 87, 232, 0.27);
+}
+
+.task-modal-body button[type="submit"]:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+@keyframes task-modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes task-modal-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .task-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .task-modal {
+    max-width: none;
+    max-height: 92vh;
+    border-radius: 22px 22px 0 0;
+  }
+
+  .task-modal-header {
+    padding: 22px 20px;
+  }
+
+  .task-modal-header h2 {
+    font-size: 20px;
+  }
+
+  .task-modal-body {
+    padding: 22px 20px 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-modal-backdrop,
+  .task-modal {
+    animation: none;
+  }
+}

@@ -15,13 +15,7 @@ export default defineConfig({
         }),
         react(),
         tailwindcss(),
-        laravel({
-        input: [
-            "resources/css/app.css",
-            "resources/js/app.tsx",
-        ],
-        refresh: true,
-}),
+    
     ],
     server: {
         watch: {

@@ -418,110 +418,184 @@ function TaskFlowApp() {
           </div>
         )}
 
-        {showForm && (
-          <form className="task-form" onSubmit={submitTask}>
-            <div className="section-heading">
-              <div>
-                <h2>{editingTask ? "Edit task" : "Create a task"}</h2>
-                <p>
-                  {editingTask
-                    ? "Update the details and save your changes."
-                    : "Add something you want to accomplish."}
-                </p>
-              </div>
-              <button
-                className="button button-quiet"
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingTask(null);
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-
-            <label>
-              Task title
-              <input
-                value={form.title}
-                onChange={(event) => updateForm("title", event.target.value)}
-                placeholder="What needs to get done?"
-                minLength={3}
-                maxLength={120}
-                required
-                aria-describedby="task-title-help"
-              />
-              <span id="task-title-help" className="muted">
-                Required; 3–120 characters.
-              </span>
-            </label>
-
-            <label>
-              Description
-              <textarea
-                value={form.description}
-                onChange={(event) =>
-                  updateForm("description", event.target.value)
-                }
-                placeholder="Add some details (optional)"
-                maxLength={1000}
-                rows={3}
-              />
-            </label>
-
-            <label>
-              Status
-              <select
-                value={form.status}
-                onChange={(event) =>
-                  updateForm("status", event.target.value as TaskStatus)
-                }
-              >
-                <option value="todo">To do</option>
-                <option value="in_progress">In progress</option>
-                <option value="done">Completed</option>
-              </select>
-            </label>
-
-            <label>
-              Priority
-              <select
-                value={form.priority}
-                onChange={(event) =>
-                  updateForm("priority", event.target.value as TaskPriority)
-                }
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </label>
-
-            <label>
-              Due date
-              <input
-                type="date"
-                value={form.due_date}
-                onChange={(event) =>
-                  updateForm("due_date", event.target.value)
-                }
-              />
-            </label>
-
-            <button
-              className="button button-primary"
-              type="submit"
-              disabled={saving}
+{showForm && (
+          <div
+            className="task-modal-backdrop"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !saving) {
+                setShowForm(false);
+                setEditingTask(null);
+              }
+            }}
+          >
+            <section
+              className="task-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="task-modal-title"
             >
-              {saving
-                ? "Saving..."
-                : editingTask
-                  ? "Save changes"
-                  : "Create task"}
-            </button>
-          </form>
+              <header className="task-modal-header">
+                <div className="task-modal-heading">
+                  <span className="task-modal-icon" aria-hidden="true">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="4" y="4" width="16" height="16" rx="3" />
+                      <path d="M12 8v8M8 12h8" />
+                    </svg>
+                  </span>
+
+                  <div>
+                    <h2 id="task-modal-title">
+                      {editingTask ? "Edit task" : "Create a new task"}
+                    </h2>
+                    <p>
+                      {editingTask
+                        ? "Make changes to your task details."
+                        : "Plan your next move. Great work starts with a clear task."}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="task-modal-close"
+                  aria-label="Close task form"
+                  disabled={saving}
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingTask(null);
+                  }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <path d="m18 6-12 12M6 6l12 12" />
+                  </svg>
+                </button>
+              </header>
+
+              <div className="task-modal-body">
+                <form className="task-form" onSubmit={submitTask}>
+                  <div className="section-heading">
+                    <div>
+                      <h2>{editingTask ? "Edit task" : "Create a task"}</h2>
+                      <p>
+                        {editingTask
+                          ? "Update the details and save your changes."
+                          : "Add something you want to accomplish."}
+                      </p>
+                    </div>
+                    <button
+                      className="button button-quiet"
+                      type="button"
+                      onClick={() => {
+                        setShowForm(false);
+                        setEditingTask(null);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  <label>
+                    Task title
+                    <input
+                      value={form.title}
+                      onChange={(event) => updateForm("title", event.target.value)}
+                      placeholder="What needs to get done?"
+                      minLength={3}
+                      maxLength={120}
+                      required
+                      aria-describedby="task-title-help"
+                    />
+                    <span id="task-title-help" className="muted">
+                      Required; 3–120 characters.
+                    </span>
+                  </label>
+
+                  <label>
+                    Description
+                    <textarea
+                      value={form.description}
+                      onChange={(event) =>
+                        updateForm("description", event.target.value)
+                      }
+                      placeholder="Add some details (optional)"
+                      maxLength={1000}
+                      rows={3}
+                    />
+                  </label>
+
+                  <label>
+                    Status
+                    <select
+                      value={form.status}
+                      onChange={(event) =>
+                        updateForm("status", event.target.value as TaskStatus)
+                      }
+                    >
+                      <option value="todo">To do</option>
+                      <option value="in_progress">In progress</option>
+                      <option value="done">Completed</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    Priority
+                    <select
+                      value={form.priority}
+                      onChange={(event) =>
+                        updateForm("priority", event.target.value as TaskPriority)
+                      }
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    Due date
+                    <input
+                      type="date"
+                      value={form.due_date}
+                      onChange={(event) =>
+                        updateForm("due_date", event.target.value)
+                      }
+                    />
+                  </label>
+
+                  <button
+                    className="button button-primary"
+                    type="submit"
+                    disabled={saving}
+                  >
+                    {saving
+                      ? "Saving..."
+                      : editingTask
+                        ? "Save changes"
+                        : "Create task"}
+                  </button>
+                </form>
+              </div>
+            </section>
+          </div>
         )}
+
 
         {selectedTask && (
           <section className="task-form" aria-labelledby="task-details-heading">
