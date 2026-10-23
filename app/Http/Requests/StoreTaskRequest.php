@@ -2,28 +2,47 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTaskRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        // Authentication is explicitly out of scope for Week 1.
+        return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'title' => [
+                'required',
+                'string',
+                'min:3',
+                'max:120',
+            ],
+            'description' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:1000',
+            ],
+            'status' => [
+                'sometimes',
+                'required',
+                Rule::in(['todo', 'in_progress', 'done']),
+            ],
+            'priority' => [
+                'sometimes',
+                'required',
+                Rule::in(['low', 'medium', 'high']),
+            ],
+            'due_date' => [
+                'sometimes',
+                'nullable',
+                'date_format:Y-m-d',
+            ],
         ];
     }
 }
