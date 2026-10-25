@@ -377,35 +377,34 @@ useEffect(() => {
           
       <aside className={`sidebar ${isCollapsed ? "sidebar-collapsed" : ""}`}>
         <div className={`sidebar-header ${isCollapsed ? "is-collapsed" : ""}`}>
-          {!isCollapsed && (
-            <div className="sidebar-brand">
-             <a className="brand" href="#dashboard" aria-label="TaskFlow home">
-                <span className="brand-mark">T</span>
-                <span>TaskFlow</span>
-              </a>
-                    
-            </div>
-          )}
-
+          <div className="sidebar-brand">
+            <a className="brand" href="#dashboard" aria-label="TaskFlow home">
+              <span className="brand-mark">T</span>
+              {!isCollapsed && <span>TaskFlow</span>}
+            </a> 
+          </div>
         </div>
 
-        <p className="sidebar-label">WORKSPACE</p>
+        {!isCollapsed && <p className="sidebar-label">WORKSPACE</p>}
 
         <nav className="sidebar-nav" aria-label="Main navigation">
           <a className="nav-item active" href="#dashboard">
-            <span aria-hidden="true">▦</span> Overview
+            <span aria-hidden="true">▦</span> {!isCollapsed && "Overview"}
           </a>
           <a className="nav-item" href="#tasks">
-            <span aria-hidden="true">☷</span> My tasks
+            <span aria-hidden="true">☷</span> {!isCollapsed && "My tasks"}
           </a>
         </nav>
 
         <div className="sidebar-bottom">
           <span className="avatar" aria-hidden="true">U</span>
-          <div>
-            <strong>Workspace member</strong>
-            <span className="muted">Personal workspace</span>
-          </div>
+          
+          {!isCollapsed  && (
+            <div>
+              <strong>Workspace member</strong>
+              <span className="muted">Personal workspace</span>
+            </div>
+          )}
         </div>
       </aside>
 

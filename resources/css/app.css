@@ -715,8 +715,24 @@ a {
     display: flex;
     gap: 7px;
     margin-top: 15px;
+    flex-direction: column;
   }
 
+  .sidebar.sidebar-collapsed {
+  width: 0px;
+  min-width: 0px;
+  opacity: 1;
+  overflow: hidden;
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  pointer-events: none;
+}
+
+.main-panel-toggle {
+  margin-left: -100px!important;
+  justify-content: center;
+}
   .nav-item {
     padding: 9px 12px;
   }
