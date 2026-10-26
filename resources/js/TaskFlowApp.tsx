@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import type { TaskStatus, TaskPriority, Task, TaskInput } from "./types/task"; 
+import Toast, { type ToastVariant } from "./components/Toast";
 
 const tasksEndpoint = "/api/tasks";
 
@@ -56,9 +57,9 @@ async function createTask(input: TaskInput): Promise<Task> {
 
 async function updateTask(id: Task["id"], input: Partial<TaskInput>): Promise<Task> {
   return taskFromResponse(
-    await request(`${tasksEndpoint}/${id}`, { method: "PUT", body: JSON.stringify(input) }),
+    await request(`${tasksEndpoint}/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
   );
-}
+}  
 
 async function deleteTask(id: Task["id"]): Promise<void> {
   await request(`${tasksEndpoint}/${id}`, { method: "DELETE" });
@@ -118,7 +119,6 @@ function TaskFlowApp() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   const [showForm, setShowForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -130,10 +130,19 @@ function TaskFlowApp() {
   const DESKTOP_BREAKPOINT = 1024;
 
   const [isDesktop, setIsDesktop] = useState(
-  () => window.innerWidth >= DESKTOP_BREAKPOINT,
-);
+    () => window.innerWidth >= DESKTOP_BREAKPOINT,
+  );
 
 const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const [toast, setToast] = useState<{
+    message: string;
+    variant: ToastVariant;
+  } | null>(null);
+
+  const dismissToast = useCallback(() => {
+    setToast(null);
+  }, []);
 
 useEffect(() => {
   const mediaQuery = window.matchMedia(
@@ -194,13 +203,12 @@ useEffect(() => {
     setEditingTask(null);
     setForm({ ...emptyForm });
     setError("");
-    setMessage("");
     setShowForm(true);
   }
 
   async function openEditForm(task: Task) {
     setError("");
-    setMessage("");
+
 
     try {
       const latestTask = await getTask(task.id);
@@ -235,7 +243,6 @@ useEffect(() => {
   async function submitTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setMessage("");
 
     const title = form.title.trim();
 
@@ -256,11 +263,17 @@ useEffect(() => {
 
       if (editingTask) {
         await updateTask(editingTask.id, input);
-        setMessage("Task updated successfully.");
+        setToast({
+          variant: "success",
+          message: "Your new task has been updated successfully.",
+        });
       } else {
         await createTask(input);
         setPage(1);
-        setMessage("Task created successfully.");
+        setToast({
+          variant: "success",
+          message: "Your new task has been created successfully.",
+        });
       }
 
       setShowForm(false);
@@ -277,6 +290,11 @@ useEffect(() => {
       setError(
         err instanceof Error ? err.message : "Unable to save this task.",
       );
+      setToast({
+        variant: "error",
+        message: "The operation failed. Please try again.",
+      });
+
     } finally {
       setSaving(false);
     }
@@ -284,11 +302,13 @@ useEffect(() => {
 
   async function changeStatus(task: Task, status: TaskStatus) {
     setError("");
-    setMessage("");
 
     try {
       await updateTask(task.id, { status });
-      setMessage(`"${task.title}" status updated.`);
+      setToast({
+        variant: "success",
+        message: `${task.title} status updated.`,
+      });
       await loadTasks();
 
       if (selectedTask?.id === task.id) {
@@ -310,11 +330,13 @@ useEffect(() => {
     if (!confirmed) return;
 
     setError("");
-    setMessage("");
 
     try {
       await deleteTask(task.id);
-      setMessage("Task deleted successfully.");
+      setToast({
+        variant: "success",
+        message: "Task Deleted successfully",
+      });
 
       if (selectedTask?.id === task.id) {
         setSelectedTask(null);
@@ -330,6 +352,10 @@ useEffect(() => {
       setError(
         err instanceof Error ? err.message : "Unable to delete this task.",
       );
+      setToast({
+        variant: "error",
+        message: "Task Deletion failed",
+      });
     }
   }
 
@@ -349,6 +375,14 @@ useEffect(() => {
 
   return (
     <main className={`app-shell ${isCollapsed ? "main-panel-toggle" : ""}`}>
+      {toast && (
+        <Toast
+          key={`${toast.variant}-${toast.message}`}
+          message={toast.message}
+          variant={toast.variant}
+          onClose={dismissToast}
+        />
+      )}
                 <button
             type="button"
             className={`sidebar-toggle ${isCollapsed ? "sidebar-toggle-collapsed" : ""}`}
@@ -458,12 +492,6 @@ useEffect(() => {
           </article>
         </section>
 
-        {message && (
-          <p className="feedback-success" role="status">
-            {message}
-          </p>
-        )}
-
         {error && (
           <div className="feedback-error" role="alert">
             <span>{error}</span>
@@ -560,7 +588,7 @@ useEffect(() => {
                     </div>
                     <button
                       className="button button-quiet"
-                      type="button"
+                      type="button"                                                                
                       onClick={() => {
                         setShowForm(false);
                         setEditingTask(null);
@@ -578,7 +606,7 @@ useEffect(() => {
                       placeholder="What needs to get done?"
                       minLength={3}
                       maxLength={120}
-                      required
+                      required                                                 
                       aria-describedby="task-title-help"
                     />
                     <span id="task-title-help" className="muted">
@@ -750,7 +778,6 @@ useEffect(() => {
 
             <label className="filter-control">
               <span className="sr-only">Filter by priority</span>
-              <div>Filter by priority</div>
               <select
                 value={priorityFilter}
                 onChange={(event) => {
