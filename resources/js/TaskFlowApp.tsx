@@ -383,9 +383,9 @@ useEffect(() => {
           onClose={dismissToast}
         />
       )}
-                <button
+          <button
             type="button"
-            className={`sidebar-toggle ${isCollapsed ? "sidebar-toggle-collapsed" : ""}`}
+            className={`sidebar-toggle ${isCollapsed ? "sidebar-toggle-collapsed" : ""} ${showForm ? "showForm-active" : ""}`} 
             title={isCollapsed && isDesktop ? "Tasks" : undefined}
             onClick={() => setIsCollapsed((prev) => !prev)}
             aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
@@ -410,7 +410,7 @@ useEffect(() => {
           </button>
           
       <aside className={`sidebar ${isCollapsed ? "sidebar-collapsed" : ""}`}>
-        <div className={`sidebar-header ${isCollapsed ? "is-collapsed" : ""}`}>
+        <div>
           <div className="sidebar-brand">
             <a className="brand" href="#dashboard" aria-label="TaskFlow home">
               <span className="brand-mark">T</span>
@@ -442,7 +442,7 @@ useEffect(() => {
         </div>
       </aside>
 
-      <section className="main-panel" id="dashboard">
+      <section className={`main-panel ${isCollapsed ? "main-panel-increase" : ""} `} id="dashboard">
         <header className="topbar">
           <div>
             <span className="eyebrow">WORKSPACE / OVERVIEW</span>

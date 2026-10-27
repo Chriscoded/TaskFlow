@@ -210,6 +210,13 @@ a {
   padding: 38px clamp(24px, 4vw, 62px) 22px;
 }
 
+.main-panel-collapse{
+  max-width: 1600px;
+  min-height: 100vh;
+  margin-left: 244px;
+  padding: 38px clamp(24px, 4vw, 62px) 22px;
+}
+
 .topbar,
 .section-heading,
 .task-toolbar,
@@ -663,6 +670,10 @@ a {
   white-space: nowrap;
   clip-path: inset(50%);
 }
+.main-panel-toggle {
+  margin-left: -100px!important;
+  justify-content: center;
+}
 
 @media (min-width: 1500px) {
   .main-panel {
@@ -718,16 +729,6 @@ a {
     flex-direction: column;
   }
 
-  .sidebar.sidebar-collapsed {
-  width: 0px;
-  min-width: 0px;
-  opacity: 1;
-  overflow: hidden;
-  border: none;
-  padding-left: 0;
-  padding-right: 0;
-  pointer-events: none;
-}
 
 .main-panel-toggle {
   margin-left: -100px!important;
@@ -1112,6 +1113,9 @@ button:disabled {
   pointer-events: none;
 }
 
+.main-panel-increase{
+  margin-left: 95px;
+}
 .main-panel-toggle {
   margin-left: -50px!important;
   justify-content: center;
@@ -1141,7 +1145,7 @@ button:disabled {
 }
 
 .sidebar-toggle-collapsed {
-  left: 52px;
+  left: 60px!important;
 }
 
 .sidebar-toggle:focus-visible {
@@ -1274,4 +1278,8 @@ button:disabled {
   .toast {
     animation: none;
   }
+}
+
+.showForm-active{
+  opacity: 0.1;
 }
