@@ -11,4 +11,9 @@ class TaskPageController extends Controller
     {
         return view('tasks');
     }
+
+     public function task(): View
+    {
+        return view('tasks');
+    }
 }

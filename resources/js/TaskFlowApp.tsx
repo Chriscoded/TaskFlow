@@ -134,6 +134,7 @@ function TaskFlowApp() {
   );
 
 const [isCollapsed, setIsCollapsed] = useState(false);
+const currentPath = window.location.pathname;
 
   const [toast, setToast] = useState<{
     message: string;
@@ -422,11 +423,22 @@ useEffect(() => {
         {!isCollapsed && <p className="sidebar-label">WORKSPACE</p>}
 
         <nav className="sidebar-nav" aria-label="Main navigation">
-          <a className="nav-item active" href="#dashboard">
-            <span aria-hidden="true">▦</span> {!isCollapsed && "Overview"}
+          <a
+            className={`nav-item ${currentPath === "/dashboard" ? "active" : ""}`}
+            href="/dashboard"
+            aria-current={currentPath === "/dashboard" ? "page" : undefined}
+          >
+            <span aria-hidden="true">▦</span>
+            {!isCollapsed && "Overview"}
           </a>
-          <a className="nav-item" href="#tasks">
-            <span aria-hidden="true">☷</span> {!isCollapsed && "My tasks"}
+
+          <a
+            className={`nav-item ${currentPath === "/tasks" ? "active" : ""}`}
+            href="/tasks"
+            aria-current={currentPath === "/tasks" ? "page" : undefined}
+          >
+            <span aria-hidden="true">☷</span>
+            {!isCollapsed && "My tasks"}
           </a>
         </nav>
 
