@@ -9,58 +9,44 @@ use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 
 class TaskController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * List only the authenticated user's tasks.
+     */
+    public function index(Request $request): AnonymousResourceCollection
     {
-            $filters = $request->validate([
-                'status' => [
-                    'sometimes',
-                    'required',
-                    Rule::in(['todo', 'in_progress', 'done']),
-                ],
-                'priority' => [
-                    'sometimes',
-                    'required',
-                    Rule::in(['low', 'medium', 'high']),
-                ],
-                'search' => [
-                    'sometimes',
-                    'nullable',
-                    'string',
-                    'max:255',
-                ],
-            ]);
+        $filters = $request->validate([
+            'status' => ['sometimes', 'nullable', 'in:todo,in_progress,done'],
+            'priority' => ['sometimes', 'nullable', 'in:low,medium,high'],
+            'search' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'page' => ['sometimes', 'integer', 'min:1'],
+        ]);
 
-        $tasks = Task::query()
-            ->when(
-                isset($filters['status']),
-                fn ($query) => $query->where(
-                    'status',
-                    $filters['status']
-                )
-            )
-            ->when(
-                isset($filters['priority']),
-                fn ($query) => $query->where(
-                    'priority',
-                    $filters['priority']
-                )
-            )
-            ->when(
-                filled($filters['search'] ?? null),
-                function ($query) use ($filters) {
-                    $search = $filters['search'];
+        $query = $request->user()->tasks();
 
-                    $query->where(function ($subQuery) use ($search) {
-                        $subQuery
-                            ->where('title', 'like', "%{$search}%")
-                            ->orWhere('description', 'like', "%{$search}%");
-                    });
-                }
-            )
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (! empty($filters['priority'])) {
+            $query->where('priority', $filters['priority']);
+        }
+
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $tasks = $query
             ->orderByDesc('created_at')
             ->orderByDesc('id')
             ->paginate(10)
@@ -69,33 +55,74 @@ class TaskController extends Controller
         return TaskResource::collection($tasks);
     }
 
+    /**
+     * Create a task owned by the authenticated user.
+     */
     public function store(StoreTaskRequest $request): JsonResponse
     {
-        $task = Task::create($request->validated());
+        $data = $request->safe()->only([
+            'title',
+            'description',
+            'status',
+            'priority',
+            'due_date',
+        ]);
+
+        $task = $request->user()->tasks()->create($data);
 
         return (new TaskResource($task))
             ->response()
             ->setStatusCode(201);
     }
 
-    public function show(Task $task): TaskResource
+    /**
+     * Show a task only if it belongs to the authenticated user.
+     */
+    public function show(Request $request, int $task): TaskResource
     {
-        return new TaskResource($task);
+        $ownedTask = $request->user()
+            ->tasks()
+            ->findOrFail($task);
+
+        return new TaskResource($ownedTask);
     }
 
+    /**
+     * Update only the supplied, validated fields of an owned task.
+     */
     public function update(
         UpdateTaskRequest $request,
-        Task $task
+        int $task
     ): TaskResource {
-        $task->update($request->validated());
+        $ownedTask = $request->user()
+            ->tasks()
+            ->findOrFail($task);
 
-        return new TaskResource($task->refresh());
+        $data = $request->safe()->only([
+            'title',
+            'description',
+            'status',
+            'priority',
+            'due_date',
+        ]);
+
+        $ownedTask->update($data);
+        $ownedTask->refresh();
+
+        return new TaskResource($ownedTask);
     }
 
-    public function destroy(Task $task): JsonResponse
+    /**
+     * Delete a task only if it belongs to the authenticated user.
+     */
+    public function destroy(Request $request, int $task): Response
     {
-        $task->delete();
+        $ownedTask = $request->user()
+            ->tasks()
+            ->findOrFail($task);
 
-        return response()->json(null, 204);
+        $ownedTask->delete();
+
+        return response()->noContent();
     }
 }

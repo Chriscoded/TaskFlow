@@ -20,18 +20,31 @@ export async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const headers = new Headers(options.headers);
+  const token = localStorage.getItem("taskflow_token");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const url = `${API_BASE_URL}${normalizedPath}`;
 
+  const headers = new Headers(options.headers);
   headers.set("Accept", "application/json");
 
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const response = await fetch(url, {
     ...options,
     headers,
   });
+
+  if (response.status === 401 && token) {
+    localStorage.removeItem("taskflow_token");
+    localStorage.removeItem("taskflow_user");
+    window.dispatchEvent(new Event("taskflow:unauthorized"));
+  }
 
   if (response.status === 204) {
     return undefined as T;

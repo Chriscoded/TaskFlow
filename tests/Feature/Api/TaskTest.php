@@ -5,10 +5,23 @@ namespace Tests\Feature\Api;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 
 class TaskTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected User $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::factory()->create();
+
+        Sanctum::actingAs($this->user);
+    }
 
     public function test_it_creates_a_task_with_default_values(): void
     {
@@ -58,7 +71,7 @@ class TaskTest extends TestCase
 
     public function test_it_updates_only_the_supplied_fields(): void
     {
-        $task = Task::create([
+        $task = $this->user->tasks()->create([
             'title' => 'Finish API',
             'description' => 'Original description',
         ]);
@@ -73,14 +86,17 @@ class TaskTest extends TestCase
 
         $this->assertDatabaseHas('tasks', [
             'id' => $task->id,
+            'user_id' => $this->user->id,
             'status' => 'in_progress',
             'title' => 'Finish API',
         ]);
     }
 
+
+
     public function test_it_deletes_a_task(): void
     {
-        $task = Task::create([
+        $task = $this->user->tasks()->create([
             'title' => 'Remove obsolete task',
         ]);
 
@@ -92,21 +108,22 @@ class TaskTest extends TestCase
         ]);
     }
 
+    
     public function test_it_filters_by_status_and_priority_together(): void
     {
-        Task::create([
+        $this->user->tasks()->create([
             'title' => 'Matching task',
             'status' => 'todo',
             'priority' => 'high',
         ]);
 
-        Task::create([
+        $this->user->tasks()->create([
             'title' => 'Wrong priority',
             'status' => 'todo',
             'priority' => 'low',
         ]);
 
-        Task::create([
+        $this->user->tasks()->create([
             'title' => 'Wrong status',
             'status' => 'done',
             'priority' => 'high',
@@ -117,7 +134,6 @@ class TaskTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'Matching task');
     }
-
     // public function test_it_returns_paginated_tasks(): void
     // {
     //     Task::factory()->count(12)->create();
@@ -134,10 +150,11 @@ class TaskTest extends TestCase
     // }
 
 
+    
     public function test_it_returns_paginated_tasks(): void
     {
         for ($i = 1; $i <= 12; $i++) {
-            Task::create([
+            $this->user->tasks()->create([
                 'title' => sprintf('Task number %02d', $i),
             ]);
         }
@@ -152,6 +169,7 @@ class TaskTest extends TestCase
             ->assertOk()
             ->assertJsonCount(2, 'data');
     }
+
 
 
     public function test_missing_tasks_return_not_found(): void

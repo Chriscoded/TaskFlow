@@ -1,21 +1,17 @@
 
-
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import TaskFlowApp from "./TaskFlowApp";
-import "../css/app.css";
+import AuthGate from "./AuthGate";
+import "./bootstrap";
 
 const rootElement = document.getElementById("app");
 
 if (!rootElement) {
-  throw new Error(
-    'React could not find the root element "#app". Check your Blade view.',
-  );
+  throw new Error('Could not find the application root element "#app".');
 }
 
 createRoot(rootElement).render(
   <StrictMode>
-    <TaskFlowApp />
+    <AuthGate />
   </StrictMode>,
 );
-

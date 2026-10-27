@@ -1,9 +1,14 @@
-
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import type { TaskStatus, TaskPriority, Task, TaskInput } from "./types/task"; 
+import type { TaskStatus, TaskPriority, Task, TaskInput } from "./types/task";
 import Toast, { type ToastVariant } from "./components/Toast";
+import {
+  getTasks,
+  getTask,
+  createTask,
+  updateTask,
+  deleteTask,
+} from "./api/tasks";
 
-const tasksEndpoint = "/api/tasks";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
@@ -31,39 +36,6 @@ function taskFromResponse(payload: Task | { data: Task }): Task {
   return "data" in payload ? payload.data : payload;
 }
 
-async function getTasks(params: {
-  status?: TaskStatus;
-  priority?: TaskPriority;
-  search: string;
-  page: number;
-}): Promise<{ data: Task[]; meta: { current_page: number; last_page: number; total: number } }> {
-  const query = new URLSearchParams();
-  if (params.status) query.set("status", params.status);
-  if (params.priority) query.set("priority", params.priority);
-  if (params.search) query.set("search", params.search);
-  query.set("page", String(params.page));
-  return request(`${tasksEndpoint}?${query.toString()}`);
-}
-
-async function getTask(id: Task["id"]): Promise<Task> {
-  return taskFromResponse(await request(`${tasksEndpoint}/${id}`));
-}
-
-async function createTask(input: TaskInput): Promise<Task> {
-  return taskFromResponse(
-    await request(tasksEndpoint, { method: "POST", body: JSON.stringify(input) }),
-  );
-}
-
-async function updateTask(id: Task["id"], input: Partial<TaskInput>): Promise<Task> {
-  return taskFromResponse(
-    await request(`${tasksEndpoint}/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
-  );
-}  
-
-async function deleteTask(id: Task["id"]): Promise<void> {
-  await request(`${tasksEndpoint}/${id}`, { method: "DELETE" });
-}
 
 const statusLabels: Record<TaskStatus, string> = {
   todo: "To do",
