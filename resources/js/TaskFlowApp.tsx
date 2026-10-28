@@ -79,7 +79,14 @@ function taskToForm(task: Task): TaskFormState {
   };
 }
 
-function TaskFlowApp() {
+interface TaskFlowAppProps {
+  isCollapsed: boolean;
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+}
+function TaskFlowApp({
+  isCollapsed,
+  setIsCollapsed,
+}: TaskFlowAppProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<"" | TaskStatus>("");
   const [priorityFilter, setPriorityFilter] = useState<"" | TaskPriority>("");
@@ -105,7 +112,7 @@ function TaskFlowApp() {
     () => window.innerWidth >= DESKTOP_BREAKPOINT,
   );
 
-const [isCollapsed, setIsCollapsed] = useState(false);
+// const [isCollapsed, setIsCollapsed] = useState(false);
 const currentPath = window.location.pathname;
 
   const [toast, setToast] = useState<{
