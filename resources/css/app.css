@@ -202,11 +202,10 @@ a {
   color: #9297a8;
   font-size: 10px;
 }
-
 .main-panel {
   max-width: 1600px;
   min-height: 100vh;
-  margin-left: 244px;
+  margin-left: 180px;
   padding: 38px clamp(24px, 4vw, 62px) 22px;
 }
 
@@ -1094,8 +1093,8 @@ button:disabled {
 }
 
 .sidebar {
-  width: 240px;
-  min-width: 240px;
+  width: 180px;
+  min-width: 180px;
   flex-shrink: 0;
   transition:
     width 0.25s ease,
@@ -1123,8 +1122,8 @@ button:disabled {
 
 .sidebar-toggle {
   position: fixed;
-  top: 18px;
-  left: 240px;
+  top: 70px;
+  left: 180px;
   z-index: 1001;
   display: inline-flex;
   align-items: center;
@@ -1146,6 +1145,7 @@ button:disabled {
 
 .sidebar-toggle-collapsed {
   left: 60px!important;
+  top: 18px;
 }
 
 .sidebar-toggle:focus-visible {

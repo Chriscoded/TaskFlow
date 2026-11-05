@@ -190,7 +190,7 @@ export default function AuthGate() {
             <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
                 <BrandMark />
-                <div>
+                <div className="flex flex-col">
                 <p className="font-bold tracking-tight text-slate-900">
                     TaskFlow
                 </p>

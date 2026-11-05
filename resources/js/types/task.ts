@@ -33,10 +33,19 @@ export interface TaskInput {
   due_date: string | null;
 }
 
+export type TaskSortField = "created_at" | "due_date" | "priority";
+export type SortDirection = "asc" | "desc";
+
 export interface TaskFilters {
   status?: TaskStatus;
   priority?: TaskPriority;
+  search?: string;
+  date_from?: string;
+  date_to?: string;
   page?: number;
+  per_page?: number;
+  sort_by?: TaskSortField;
+  sort_direction?: SortDirection;
 }
 
 export interface PaginatedTasks {
