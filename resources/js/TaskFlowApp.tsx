@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import type { TaskStatus, TaskPriority, Task, TaskInput } from "./types/task";
 import Toast, { type ToastVariant } from "./components/Toast";
+import type { TaskStatus, TaskPriority, Task, TaskInput, TaskSortField, SortDirection } from "./types/task";
 import {
   getTasks,
   getTask,
@@ -8,34 +8,6 @@ import {
   updateTask,
   deleteTask,
 } from "./api/tasks";
-
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, {
-    ...init,
-    headers: {
-      Accept: "application/json",
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      ...init?.headers,
-    },
-    credentials: "same-origin",
-  });
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const validationErrors = payload?.errors
-      ? Object.values(payload.errors as Record<string, string[]>).flat()[0]
-      : undefined;
-    throw new Error(validationErrors || payload?.message || "The request failed.");
-  }
-
-  return payload as T;
-}
-
-function taskFromResponse(payload: Task | { data: Task }): Task {
-  return "data" in payload ? payload.data : payload;
-}
-
 
 const statusLabels: Record<TaskStatus, string> = {
   todo: "To do",
@@ -90,7 +62,16 @@ function TaskFlowApp({
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<"" | TaskStatus>("");
   const [priorityFilter, setPriorityFilter] = useState<"" | TaskPriority>("");
+
   const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  const [sortBy, setSortBy] = useState<TaskSortField>("created_at");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  const [perPage, setPerPage] = useState(10);
+
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [totalTasks, setTotalTasks] = useState(0);
@@ -111,6 +92,7 @@ function TaskFlowApp({
   const [isDesktop, setIsDesktop] = useState(
     () => window.innerWidth >= DESKTOP_BREAKPOINT,
   );
+  
 
 // const [isCollapsed, setIsCollapsed] = useState(false);
 const currentPath = window.location.pathname;
@@ -151,7 +133,12 @@ useEffect(() => {
         status: filter || undefined,
         priority: priorityFilter || undefined,
         search,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
         page,
+        per_page: perPage,
+        sort_by: sortBy,
+        sort_direction: sortDirection,
       });
 
       setTasks(result.data);
@@ -165,7 +152,7 @@ useEffect(() => {
     } finally {
       setLoading(false);
     }
-  }, [filter, priorityFilter, search, page]);
+  }, [filter,priorityFilter,search,dateFrom,dateTo,page,perPage,sortBy,sortDirection,]);
 
   useEffect(() => {
     void loadTasks();
@@ -222,6 +209,11 @@ useEffect(() => {
 
   async function submitTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+     
+    // Prevent duplicate submissions while a request is in progress.
+    if (saving) return;
+
     setError("");
 
     const title = form.title.trim();
@@ -343,6 +335,13 @@ useEffect(() => {
     setFilter("");
     setPriorityFilter("");
     setSearch("");
+    setDateFrom("");
+    setDateTo("");
+
+    setSortBy("created_at");
+    setSortDirection("desc");
+    setPerPage(10);
+
     setPage(1);
   }
 
@@ -732,11 +731,32 @@ useEffect(() => {
               <h2>Tasks</h2>
               <p>Keep track of what matters.</p>
             </div>
-            <span className="task-count">
-              {totalTasks} matching tasks
-            </span>
-          </div>
+            <div className="d-flex gap-2 flex-column">
+              <span className="task-count">
+                {totalTasks} matching tasks
+              </span>
 
+              <button
+              className="button button-quiet"
+              type="button"
+              onClick={clearFilters}
+              disabled={
+                !filter &&
+                !priorityFilter &&
+                !search &&
+                !dateFrom &&
+                !dateTo &&
+                sortBy === "created_at" &&
+                sortDirection === "desc" &&
+                perPage === 10
+              }
+            >
+              Clear filters
+            </button>
+            </div>
+           
+          </div>
+   
           <div className="task-toolbar">
             <label className="search-box">
               <span aria-hidden="true">⌕</span>
@@ -785,15 +805,93 @@ useEffect(() => {
               </select>
             </label>
 
-            <button
-              className="button button-quiet"
-              type="button"
-              onClick={clearFilters}
-              disabled={!filter && !priorityFilter && !search}
-            >
-              Clear filters
-            </button>
+            <div className="flex flex-col gap-1 -mt-6">
+              <label htmlFor="date-from" className="text-sm font-medium">
+                Due date from
+              </label>
+
+              <input
+                id="date-from"
+                type="date"
+                value={dateFrom}
+                max={dateTo || undefined}
+                onChange={(event) => {
+                  setDateFrom(event.target.value);
+                  setPage(1);
+                }}
+                className="rounded-lg border border-gray-300 px-3 py-2"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1 -mt-6">
+              <label htmlFor="date-to" className="text-sm font-medium">
+                Due date to
+              </label>
+
+              <input
+                id="date-to"
+                type="date"
+                value={dateTo}
+                min={dateFrom || undefined}
+                onChange={(event) => {
+                  setDateTo(event.target.value);
+                  setPage(1);
+                }}
+                className="rounded-lg border border-gray-300 px-3 py-2"
+              />
+            </div>
+
+            <label className="filter-control">
+              <span className="sr-only">Sort tasks by</span>
+              <select
+                value={sortBy}
+                onChange={(event) => {
+                  setSortBy(event.target.value as TaskSortField);
+                  setPage(1);
+                }}
+                aria-label="Sort tasks by"
+              >
+                <option value="created_at">Creation date</option>
+                <option value="due_date">Due date</option>
+                <option value="priority">Priority</option>
+              </select>
+            </label>
+
+            <label className="filter-control">
+              <span className="sr-only">Sort direction</span>
+              <select
+                value={sortDirection}
+                onChange={(event) => {
+                  setSortDirection(event.target.value as SortDirection);
+                  setPage(1);
+                }}
+                aria-label="Sort direction"
+              >
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+              </select>
+            </label>
+
+            <label className="filter-control">
+              <span className="sr-only">Tasks per page</span>
+              <select
+                value={perPage}
+                onChange={(event) => {
+                  setPerPage(Number(event.target.value));
+                  setPage(1);
+                }}
+                aria-label="Tasks per page"
+              >
+                <option value={10}>10 per page</option>
+                <option value={20}>20 per page</option>
+                <option value={30}>30 per page</option>
+                <option value={50}>50 per page</option>
+              </select>
+            </label>
+
+           
           </div>
+
 
           {loading ? (
             <p role="status" aria-live="polite">Loading tasks...</p>
@@ -892,6 +990,7 @@ useEffect(() => {
             </div>
           )}
 
+          
           <nav className="pagination" aria-label="Task pages">
             <button
               className="button button-quiet"
@@ -901,20 +1000,21 @@ useEffect(() => {
             >
               Previous
             </button>
+
             <span aria-live="polite">
-              Page {page} of {lastPage}
+              Page {page} of {lastPage} · {totalTasks} tasks
             </span>
+
             <button
               className="button button-quiet"
               type="button"
               disabled={page >= lastPage || loading}
-              onClick={() =>
-                setPage((current) => Math.min(lastPage, current + 1))
-              }
+              onClick={() => setPage((current) => Math.min(lastPage, current + 1))}
             >
               Next
             </button>
           </nav>
+
         </section>
 
         <footer className="app-footer">

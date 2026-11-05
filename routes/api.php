@@ -27,7 +27,8 @@ Route::post('/register', [AuthController::class, 'register'])
     ->middleware('throttle:5,1');
 
 Route::post('/login', [AuthController::class, 'login'])
-    ->middleware('throttle:5,1');
+    ->middleware('throttle:5,1')
+    ->name('login');
 
 // Authenticated endpoints.
 Route::middleware('auth:sanctum')->group(function () {
