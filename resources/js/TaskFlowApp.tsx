@@ -8,6 +8,7 @@ import {
   updateTask,
   deleteTask,
 } from "./api/tasks";
+import DebouncedSearch from "./components/DebouncedSearch";
 
 const statusLabels: Record<TaskStatus, string> = {
   todo: "To do",
@@ -15,6 +16,8 @@ const statusLabels: Record<TaskStatus, string> = {
   done: "Completed",
 };
 
+const user = localStorage.getItem("taskflow_user");
+console.log(user);
 type TaskFormState = {
   title: string;
   description: string;
@@ -421,12 +424,14 @@ useEffect(() => {
         </nav>
 
         <div className="sidebar-bottom">
-          <span className="avatar" aria-hidden="true">U</span>
+         <span className="avatar" aria-hidden="true">
+          {user ? JSON.parse(user).name?.charAt(0).toUpperCase() : ""}
+        </span>
           
           {!isCollapsed  && (
             <div>
-              <strong>Workspace member</strong>
-              <span className="muted">Personal workspace</span>
+              <strong>Signed in as</strong>
+              <span className="muted">{user ? JSON.parse(user).name : ""}</span>
             </div>
           )}
         </div>
@@ -758,18 +763,13 @@ useEffect(() => {
           </div>
    
           <div className="task-toolbar">
-            <label className="search-box">
-              <span aria-hidden="true">⌕</span>
-              <input
-                value={search}
-                onChange={(event) => {
-                  setSearch(event.target.value);
-                  setPage(1);
-                }}
-                placeholder="Search tasks..."
-                aria-label="Search tasks"
-              />
-            </label>
+            <DebouncedSearch
+              value={search}
+              onSearch={(value) => {
+                setSearch(value);
+                setPage(1);
+              }}
+            />
 
             <label className="filter-control">
               <span className="sr-only">Filter by status</span>

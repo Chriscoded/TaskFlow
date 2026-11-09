@@ -191,12 +191,10 @@ export default function AuthGate() {
             <div className="flex items-center gap-3">
                 <BrandMark />
                 <div className="flex flex-col">
-                <p className="font-bold tracking-tight text-slate-900">
-                    TaskFlow
-                </p>
-                <p className="text-sm text-slate-500">
-                    Signed in as {user.name}
-                </p>
+                    <p className="font-bold tracking-tight text-slate-900">
+                        TaskFlow
+                    </p>
+                
                 </div>
             </div>
 
